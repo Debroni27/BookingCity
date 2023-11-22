@@ -4,9 +4,8 @@ from sqlalchemy import and_, func, or_, select
 
 from app.bookings.models import Bookings
 from app.dao.base import BaseDAO
-from app.database import async_session_maker, engine
+from app.database import async_session_maker
 from app.hotels.rooms.models import Rooms
-from app.logger import logger
 
 
 class RoomDAO(BaseDAO):
@@ -14,20 +13,6 @@ class RoomDAO(BaseDAO):
 
     @classmethod
     async def find_all(cls, hotel_id: int, date_from: date, date_to: date):
-        """
-        WITH booked_rooms AS (
-            SELECT room_id, COUNT(room_id) AS rooms_booked
-            FROM bookings
-            WHERE (date_from >= '2023-05-15' AND date_from <= '2023-06-20') OR
-                  (date_from <= '2023-05-15' AND date_to > '2023-05-15')
-            GROUP BY room_id
-        )
-        SELECT
-            -- все столбцы из rooms,
-            (quantity - COALESCE(rooms_booked, 0)) AS rooms_left FROM rooms
-        LEFT JOIN booked_rooms ON booked_rooms.room_id = rooms.id
-        WHERE hotel_id = 1
-        """
         booked_rooms = (
             select(Bookings.room_id, func.count(Bookings.room_id).label("rooms_booked"))
             .select_from(Bookings)
@@ -59,6 +44,5 @@ class RoomDAO(BaseDAO):
             )
         )
         async with async_session_maker() as session:
-            # logger.debug(get_rooms.compile(engine, compile_kwargs={"literal_binds": True}))
             rooms = await session.execute(get_rooms)
             return rooms.mappings().all()
