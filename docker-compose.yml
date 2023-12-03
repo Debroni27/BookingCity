@@ -6,7 +6,7 @@ services:
     volumes:
       - postgresdata:/var/lib/postgresql/data
     env_file:
-      - .env-non-dev
+      - .env
     ports:
       - 5433:5433
 
@@ -20,7 +20,7 @@ services:
       context: .
     container_name: booking_app
     env_file:
-      - .env-non-dev
+      - .env
     depends_on:
       - db
       - redis
@@ -35,7 +35,7 @@ services:
     container_name: booking_celery
     command: ["/booking/docker/celery.sh", "celery"]
     env_file:
-      - .env-non-dev
+      - .env
     depends_on:
       - redis
 
@@ -46,7 +46,7 @@ services:
     container_name: booking_flower
     command: ["/booking/docker/celery.sh", "flower"]
     env_file:
-      - .env-non-dev
+      - .env
     depends_on:
       - redis
     ports:
